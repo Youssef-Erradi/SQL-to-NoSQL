@@ -7,16 +7,16 @@ import java.sql.SQLException;
 public class DBConnection {
 	
 	private static Connection connection;
-	private static String url = "jdbc:mysql://localhost:3306";
-	private static String username = "root";
-	private static String password = "";
+	private static final String URL = "jdbc:mysql://localhost:3306";
+	private static final String USERNAME = "root";
+	private static final String PASSWORD = "";
 	
 	private DBConnection() {}
 	
 	public static Connection getConnection() {
 		if( connection == null)
 			try {
-				connection = DriverManager.getConnection(url, username, password);
+				connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
