@@ -10,24 +10,18 @@ import java.util.Map;
 import org.json.simple.JSONArray;
 
 public class FileSaver {
-
 	public static final String FOLDER_PATH = "files/";
-	
-	static {
-		try {
-			Files.createDirectory(Paths.get(FOLDER_PATH));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void saveDataAsJSON(Map<String,JSONArray> data) {
-		data.forEach((table, rows)->{
-			try (BufferedWriter writer = new BufferedWriter(new FileWriter(FOLDER_PATH + table+".json"))) {
+
+	public static String saveDataAsJSON(String parentFolder, Map<String, JSONArray> data) throws IOException {
+		String filespath = FOLDER_PATH + parentFolder + "/";
+		Files.createDirectories(Paths.get(filespath));
+		data.forEach((table, rows) -> {
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(filespath + table + ".json"))) {
 				writer.write(rows.toJSONString());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});
+		return filespath;
 	}
 }
