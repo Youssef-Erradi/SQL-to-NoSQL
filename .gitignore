@@ -1,6 +1,6 @@
 */test
 *.rar
-files/*
+/files
 
 .project
 .metadata
