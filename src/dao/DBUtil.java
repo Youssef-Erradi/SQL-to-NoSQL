@@ -27,7 +27,8 @@ public class DBUtil {
 			PreparedStatement ps = connection.prepareStatement(
 					"SELECT `TABLE_NAME`, `COLUMN_NAME`, `REFERENCED_TABLE_NAME`,`REFERENCED_COLUMN_NAME` "
 							+ "FROM `INFORMATION_SCHEMA`.`KEY_COLUMN_USAGE` "
-							+ "WHERE `TABLE_SCHEMA` = ? AND `REFERENCED_TABLE_NAME` IS NOT NULL");
+							+ "WHERE `TABLE_SCHEMA` = ? AND `REFERENCED_TABLE_NAME` IS NOT NULL "
+							+ "ORDER BY `TABLE_NAME`");
 			ps.setString(1, dbName);
 			ResultSet rs = ps.executeQuery();
 			String message = "`%s` de `%s` fait référence à `%s` de `%s`";
