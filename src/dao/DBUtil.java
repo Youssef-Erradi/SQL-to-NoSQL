@@ -3,9 +3,13 @@ package dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class DBUtil {
 
@@ -39,6 +43,24 @@ public class DBUtil {
 			e.printStackTrace();
 		}
 		return relationships;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static JSONArray getTableData(String tableName) {
+		JSONArray data = new JSONArray();
+		try (ResultSet resultSet = DBConnection.getConnection().createStatement()
+				.executeQuery("SELECT * FROM " + tableName)) {
+			ResultSetMetaData metadata = resultSet.getMetaData();
+			while (resultSet.next()) {
+				JSONObject json = new JSONObject();
+				for (int i = 1; i <= metadata.getColumnCount(); i++)
+					json.put(metadata.getColumnName(i), resultSet.getString(i));
+				data.add(json);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return data;
 	}
 
 }
