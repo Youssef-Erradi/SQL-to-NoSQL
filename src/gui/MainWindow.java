@@ -64,6 +64,7 @@ public class MainWindow extends JFrame {
 		btnSubmit.setFont(FONT);
 		btnSubmit.setBounds(131, 338, 196, 40);
 		getContentPane().add(btnSubmit);
+		btnSubmit.addActionListener(btnSubmitActionListener());
 
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(10, 96, 428, 232);
@@ -89,6 +90,15 @@ public class MainWindow extends JFrame {
 				String dbName = (String) databasesComboBox.getSelectedItem();
 				List<String> list = DBUtil.getRelationshipsBetweenTables(dbName);
 				listRelationships.setListData(list.toArray(new String[list.size()]));
+			}
+		};
+	}
+	
+	private ActionListener btnSubmitActionListener() {
+		return new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//TODO
 			}
 		};
 	}
