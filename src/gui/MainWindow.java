@@ -3,6 +3,7 @@ package gui;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -101,9 +102,16 @@ public class MainWindow extends JFrame {
 		return new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				FileSaver.saveDataAsJSON(DBUtil.getRelatedTablesData(dbName));
-				JOptionPane.showMessageDialog(getContentPane(),
-						"Les fichiers json sont creer avec succès dans le dossier : " + FileSaver.FOLDER_PATH);
+				try {
+					String location = FileSaver.saveDataAsJSON(dbName, DBUtil.getRelatedTablesData(dbName));
+					JOptionPane.showMessageDialog(getContentPane(),
+							"Les fichiers json sont creer avec succès dans le dossier :\n" + location);
+				} catch (IOException e1) {
+					JOptionPane.showMessageDialog(getContentPane(),
+							"une erreur s'est produite lors de la création des fichiers JSON", "Message d'erreur",
+							JOptionPane.ERROR_MESSAGE);
+					e1.printStackTrace();
+				}
 			}
 		};
 	}
