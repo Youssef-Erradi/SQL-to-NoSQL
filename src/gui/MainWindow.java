@@ -102,15 +102,22 @@ public class MainWindow extends JFrame {
 		return new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (DBUtil.getRelatedTablesData(dbName).isEmpty()) {
+					JOptionPane.showMessageDialog(getContentPane(),
+							"Elle n'existe aucune relation entre les tables de la base de donneés sélectionée", "Message",
+							JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+
 				try {
 					String location = FileSaver.saveDataAsJSON(dbName, DBUtil.getRelatedTablesData(dbName));
 					JOptionPane.showMessageDialog(getContentPane(),
 							"Les fichiers json sont creer avec succès dans le dossier :\n" + location);
 				} catch (IOException e1) {
-					JOptionPane.showMessageDialog(getContentPane(),
-							"une erreur s'est produite lors de la création des fichiers JSON", "Message d'erreur",
-							JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
+					JOptionPane.showMessageDialog(getContentPane(),
+							"Une erreur s'est produite lors de la création des fichiers JSON", "Message d'erreur",
+							JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		};
