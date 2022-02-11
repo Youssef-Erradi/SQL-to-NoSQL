@@ -10,11 +10,13 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import dao.DBUtil;
+import util.FileSaver;
 
 public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -2278436951424873713L;
@@ -94,12 +96,14 @@ public class MainWindow extends JFrame {
 			}
 		};
 	}
-	
+
 	private ActionListener btnSubmitActionListener() {
 		return new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//TODO
+				FileSaver.saveDataAsJSON(DBUtil.getRelatedTablesData(dbName));
+				JOptionPane.showMessageDialog(getContentPane(),
+						"Les fichiers json sont creer avec succès dans le dossier : " + FileSaver.FOLDER_PATH);
 			}
 		};
 	}
