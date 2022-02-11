@@ -19,6 +19,7 @@ import dao.DBUtil;
 public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -2278436951424873713L;
 	private static final Font FONT = new Font("Calibri Light", Font.PLAIN, 15);
+	private static String dbName;
 	private JComboBox<String> databasesComboBox;
 	private JList<String> listRelationships;
 
@@ -87,7 +88,7 @@ public class MainWindow extends JFrame {
 		return new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String dbName = (String) databasesComboBox.getSelectedItem();
+				dbName = (String) databasesComboBox.getSelectedItem();
 				List<String> list = DBUtil.getRelationshipsBetweenTables(dbName);
 				listRelationships.setListData(list.toArray(new String[list.size()]));
 			}
