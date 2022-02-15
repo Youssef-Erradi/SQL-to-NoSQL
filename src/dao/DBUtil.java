@@ -15,7 +15,6 @@ import java.util.TreeMap;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import enums.SchemaType;
 import pojos.Relationship;
 
 public class DBUtil {
@@ -62,18 +61,6 @@ public class DBUtil {
 			names.add(r.getReferencedTableName());
 		});
 		return names;
-	}
-
-	public static SchemaType getSchemaType(String dbName) {
-		for (String tableName : getRelatedTablesNames(dbName)) {
-			int occurences = 0;
-			for (Relationship relationship : relationships)
-				if (tableName.equalsIgnoreCase(relationship.getTableName()))
-					occurences++;
-			if (relationships.size() == occurences)
-				return SchemaType.STAR;
-		}
-		return SchemaType.SNOWFLAKE;
 	}
 
 	@SuppressWarnings("unchecked")
