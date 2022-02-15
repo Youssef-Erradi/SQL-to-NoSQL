@@ -1,9 +1,6 @@
-package beans;
+package pojos;
 
-import java.io.Serializable;
-
-public class Relationship implements Serializable {
-	private static final long serialVersionUID = -6426616525486873004L;
+public class Relationship {
 	private String tableName, columnName, referencedTableName, referencedColumnName;
 
 	public Relationship() {

@@ -15,7 +15,7 @@ import java.util.TreeMap;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import beans.Relationship;
+import pojos.Relationship;
 
 public class DBUtil {
 
@@ -51,7 +51,7 @@ public class DBUtil {
 		}
 		return relationships;
 	}
-
+	
 	private static Set<String> getRelatedTablesNames(String dbName) {
 		Set<String> names = new HashSet<>();
 		relationships.forEach(r -> {

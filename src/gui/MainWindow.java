@@ -16,8 +16,8 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import beans.Relationship;
 import dao.DBUtil;
+import pojos.Relationship;
 import util.FileSaver;
 
 public class MainWindow extends JFrame {
