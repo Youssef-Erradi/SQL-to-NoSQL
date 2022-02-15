@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import beans.Relationship;
 import dao.DBUtil;
 import util.FileSaver;
 
@@ -24,7 +25,7 @@ public class MainWindow extends JFrame {
 	private static final Font FONT = new Font("Calibri Light", Font.PLAIN, 15);
 	private static String dbName;
 	private JComboBox<String> databasesComboBox;
-	private JList<String> listRelationships;
+	private JList<Relationship> listRelationships;
 
 	public static void main(String[] args) {
 		try {
@@ -92,8 +93,8 @@ public class MainWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				dbName = (String) databasesComboBox.getSelectedItem();
-				List<String> list = DBUtil.getRelationshipsBetweenTables(dbName);
-				listRelationships.setListData(list.toArray(new String[list.size()]));
+				List<Relationship> list = DBUtil.getRelationshipsBetweenTables(dbName);
+				listRelationships.setListData(list.toArray(new Relationship[list.size()]));
 			}
 		};
 	}

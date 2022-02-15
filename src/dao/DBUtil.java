@@ -15,7 +15,11 @@ import java.util.TreeMap;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import beans.Relationship;
+
 public class DBUtil {
+
+	private static final List<Relationship> relationships = new ArrayList<>();
 
 	public static List<String> getDatabasesNames() {
 		List<String> names = new ArrayList<>();
@@ -28,8 +32,8 @@ public class DBUtil {
 		return names;
 	}
 
-	public static List<String> getRelationshipsBetweenTables(String dbName) {
-		List<String> relationships = new ArrayList<>();
+	public static List<Relationship> getRelationshipsBetweenTables(String dbName) {
+		relationships.clear();
 		try {
 			Connection connection = DBConnection.getConnection();
 			PreparedStatement ps = connection.prepareStatement(
@@ -39,10 +43,9 @@ public class DBUtil {
 							+ "ORDER BY `TABLE_NAME`");
 			ps.setString(1, dbName);
 			ResultSet rs = ps.executeQuery();
-			String message = "`%s` de `%s` fait référence à `%s` de `%s`";
 			while (rs.next())
-				relationships.add(String.format(message, rs.getString("COLUMN_NAME"), rs.getString("TABLE_NAME"),
-						rs.getString("REFERENCED_COLUMN_NAME"), rs.getString("REFERENCED_TABLE_NAME")));
+				relationships.add(new Relationship(rs.getString("TABLE_NAME"), rs.getString("COLUMN_NAME"),
+						rs.getString("REFERENCED_TABLE_NAME"), rs.getString("REFERENCED_COLUMN_NAME")));
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -51,20 +54,10 @@ public class DBUtil {
 
 	private static Set<String> getRelatedTablesNames(String dbName) {
 		Set<String> names = new HashSet<>();
-		try {
-			Connection connection = DBConnection.getConnection();
-			PreparedStatement ps = connection.prepareStatement("SELECT `TABLE_NAME`, `REFERENCED_TABLE_NAME`"
-					+ "FROM `INFORMATION_SCHEMA`.`KEY_COLUMN_USAGE` "
-					+ "WHERE `TABLE_SCHEMA` = ? AND `REFERENCED_TABLE_NAME` IS NOT NULL " + "ORDER BY `TABLE_NAME`");
-			ps.setString(1, dbName);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				names.add(rs.getString("TABLE_NAME"));
-				names.add(rs.getString("REFERENCED_TABLE_NAME"));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		relationships.forEach(r -> {
+			names.add(r.getTableName());
+			names.add(r.getReferencedTableName());
+		});
 		return names;
 	}
 
