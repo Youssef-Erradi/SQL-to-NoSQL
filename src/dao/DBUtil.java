@@ -17,6 +17,7 @@ import org.json.simple.JSONObject;
 
 import pojos.Relationship;
 
+@SuppressWarnings("unchecked")
 public class DBUtil {
 
 	private static final List<Relationship> relationships = new ArrayList<>();
@@ -63,7 +64,6 @@ public class DBUtil {
 		return names;
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Map<String, JSONArray> getRelatedTablesData(String dbName) {
 		Map<String, JSONArray> data = new TreeMap<>();
 		for (String tableName : getRelatedTablesNames(dbName))
@@ -82,6 +82,46 @@ public class DBUtil {
 				e.printStackTrace();
 			}
 		return data;
+	}
+
+	public static JSONArray getRelatedTablesAggregatedData(String dbName) {
+		JSONArray data = new JSONArray();
+		final Connection connection = DBConnection.getConnection();
+		try {
+			connection.createStatement().execute("USE `" + dbName + "`");
+			for (Relationship r : relationships) {
+				ResultSet resultSet = connection.prepareStatement("SELECT * FROM " + r.getTableName()).executeQuery();
+				ResultSetMetaData metadata = resultSet.getMetaData();
+				while (resultSet.next()) {
+					JSONObject row = new JSONObject();
+					for (int i = 1; i <= metadata.getColumnCount(); i++)
+						if (r.getColumnName().equals(metadata.getColumnName(i))) {
+							String sql = "SELECT * FROM " + r.getReferencedTableName() + " WHERE "
+									+ r.getReferencedColumnName() + "=" + resultSet.getString(i);
+							row.put(r.getColumnName(), getTableRowData(sql));
+						} else
+							row.put(metadata.getColumnName(i), resultSet.getString(i));
+					data.add(row);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return data;
+	}
+
+	private static JSONObject getTableRowData(final String sql) {
+		JSONObject object = new JSONObject();
+		try {
+			ResultSet resultSet = DBConnection.getConnection().prepareStatement(sql).executeQuery();
+			ResultSetMetaData metadata = resultSet.getMetaData();
+			if (resultSet.next())
+				for (int i = 1; i <= metadata.getColumnCount(); i++) 
+					object.put(metadata.getColumnName(i), resultSet.getString(i));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return object;
 	}
 
 }
