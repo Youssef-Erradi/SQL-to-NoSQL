@@ -24,4 +24,15 @@ public class FileSaver {
 		});
 		return filespath;
 	}
+	
+	public static String saveDataAsJSON(String parentFolder, JSONArray data) throws IOException {
+		String filespath = FOLDER_PATH + parentFolder + "/";
+		Files.createDirectories(Paths.get(filespath));
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filespath + parentFolder + ".json"))) {
+			writer.write(data.toJSONString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return filespath;
+	}
 }
