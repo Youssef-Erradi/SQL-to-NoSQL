@@ -160,7 +160,7 @@ public class DBUtil {
 			ResultSet resultSet = DBConnection.getConnection().prepareStatement(sql).executeQuery();
 			ResultSetMetaData metadata = resultSet.getMetaData();
 			JSONObject json = new JSONObject();
-			if (resultSet.next()) {
+			while (resultSet.next()) {
 				for (int i = 1; i <= metadata.getColumnCount(); i++)
 					if (!excludedList.contains(metadata.getColumnName(i)))
 						json.put(metadata.getColumnName(i), resultSet.getString(i));
