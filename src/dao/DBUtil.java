@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.TreeMap;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import enums.SchemaType;
 import pojos.Relationship;
 
 @SuppressWarnings("unchecked")
@@ -84,7 +86,19 @@ public class DBUtil {
 		return data;
 	}
 
-	public static JSONArray getRelatedTablesAggregatedData(String dbName) {
+	public static SchemaType getSchemaType(String dbName) {
+		for (String tableName : getRelatedTablesNames(dbName)) {
+			int occurences = 0;
+			for (Relationship relationship : relationships)
+				if (tableName.equalsIgnoreCase(relationship.getTableName()))
+					occurences++;
+			if (relationships.size() == occurences)
+				return SchemaType.STAR;
+		}
+		return SchemaType.SNOWFLAKE;
+	}
+
+	public static JSONArray getManyToOneTablesData(String dbName) {
 		JSONArray data = new JSONArray();
 		final Connection connection = DBConnection.getConnection();
 		try {
@@ -98,7 +112,7 @@ public class DBUtil {
 						if (r.getColumnName().equals(metadata.getColumnName(i))) {
 							String sql = "SELECT * FROM " + r.getReferencedTableName() + " WHERE "
 									+ r.getReferencedColumnName() + "=" + resultSet.getString(i);
-							row.put(r.getColumnName(), getTableRowData(sql));
+							row.put(r.getColumnName(), getTableRowData(sql).get(0));
 						} else
 							row.put(metadata.getColumnName(i), resultSet.getString(i));
 					data.add(row);
@@ -110,18 +124,52 @@ public class DBUtil {
 		return data;
 	}
 
-	private static JSONObject getTableRowData(final String sql) {
-		JSONObject object = new JSONObject();
+	public static JSONArray getOneToManyTablesData(String dbName) {
+		JSONArray data = new JSONArray();
+		final Connection connection = DBConnection.getConnection();
 		try {
-			ResultSet resultSet = DBConnection.getConnection().prepareStatement(sql).executeQuery();
-			ResultSetMetaData metadata = resultSet.getMetaData();
-			if (resultSet.next())
-				for (int i = 1; i <= metadata.getColumnCount(); i++) 
-					object.put(metadata.getColumnName(i), resultSet.getString(i));
+			connection.createStatement().execute("USE `" + dbName + "`");
+			for (Relationship r : relationships) {
+				ResultSet resultSet = connection.prepareStatement("SELECT * FROM " + r.getReferencedTableName())
+						.executeQuery();
+				ResultSetMetaData metadata = resultSet.getMetaData();
+				while (resultSet.next()) {
+					JSONObject row = new JSONObject();
+					for (int i = 1; i <= metadata.getColumnCount(); i++) {
+						row.put(metadata.getColumnName(i), resultSet.getString(i));
+						if (r.getReferencedColumnName().equals(metadata.getColumnName(i))) {
+							row.put(metadata.getColumnName(i), resultSet.getString(i));
+							String sql = "SELECT * FROM " + r.getTableName() + " WHERE " + r.getColumnName() + "="
+									+ resultSet.getString(i);
+							row.put(r.getTableName(), getTableRowData(sql, r.getColumnName()));
+						}
+					}
+					data.add(row);
+				}
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return object;
+		return data;
+	}
+
+	private static JSONArray getTableRowData(final String sql, String... excludedColumns) {
+		JSONArray array = new JSONArray();
+		List<String> excludedList = Arrays.asList(excludedColumns);
+		try {
+			ResultSet resultSet = DBConnection.getConnection().prepareStatement(sql).executeQuery();
+			ResultSetMetaData metadata = resultSet.getMetaData();
+			JSONObject json = new JSONObject();
+			if (resultSet.next()) {
+				for (int i = 1; i <= metadata.getColumnCount(); i++)
+					if (!excludedList.contains(metadata.getColumnName(i)))
+						json.put(metadata.getColumnName(i), resultSet.getString(i));
+				array.add(json);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return array;
 	}
 
 }
