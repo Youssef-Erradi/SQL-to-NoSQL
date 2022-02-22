@@ -141,7 +141,7 @@ public class DBUtil {
 							row.put(metadata.getColumnName(i), resultSet.getString(i));
 							String sql = "SELECT * FROM " + r.getTableName() + " WHERE " + r.getColumnName() + "="
 									+ resultSet.getString(i);
-							row.put(r.getTableName(), getTableRowData(sql, r.getColumnName()));
+							row.put(r.getColumnName(), getTableRowData(sql, r.getColumnName()));
 						}
 					}
 					data.add(row);
@@ -159,8 +159,8 @@ public class DBUtil {
 		try {
 			ResultSet resultSet = DBConnection.getConnection().prepareStatement(sql).executeQuery();
 			ResultSetMetaData metadata = resultSet.getMetaData();
-			JSONObject json = new JSONObject();
 			while (resultSet.next()) {
+				JSONObject json = new JSONObject();
 				for (int i = 1; i <= metadata.getColumnCount(); i++)
 					if (!excludedList.contains(metadata.getColumnName(i)))
 						json.put(metadata.getColumnName(i), resultSet.getString(i));
