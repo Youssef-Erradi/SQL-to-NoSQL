@@ -112,7 +112,7 @@ public class DBUtil {
 						if (r.getColumnName().equals(metadata.getColumnName(i))) {
 							String sql = "SELECT * FROM " + r.getReferencedTableName() + " WHERE "
 									+ r.getReferencedColumnName() + "=" + resultSet.getString(i);
-							row.put(r.getColumnName(), getTableRowData(sql).get(0));
+							row.put(r.getReferencedTableName(), getTableRowData(sql).get(0));
 						} else
 							row.put(metadata.getColumnName(i), resultSet.getString(i));
 					data.add(row);
@@ -141,7 +141,7 @@ public class DBUtil {
 							row.put(metadata.getColumnName(i), resultSet.getString(i));
 							String sql = "SELECT * FROM " + r.getTableName() + " WHERE " + r.getColumnName() + "="
 									+ resultSet.getString(i);
-							row.put(r.getColumnName(), getTableRowData(sql, r.getColumnName()));
+							row.put(r.getTableName(), getTableRowData(sql, r.getColumnName()));
 						}
 					}
 					data.add(row);
