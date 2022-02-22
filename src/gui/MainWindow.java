@@ -16,6 +16,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import dao.DBUtil;
+import enums.SchemaType;
 import pojos.Relationship;
 import util.FileSaver;
 
@@ -107,19 +108,30 @@ public class MainWindow extends JFrame {
 			try {
 				String message = "";
 				String location = "";
-				int choice = JOptionPane.NO_OPTION;
-				if (listRelationships.getModel().getSize() == 1)
-					choice = JOptionPane.showConfirmDialog(getContentPane(),
-							"Voulez-vous enregistrer toutes les données dans un seul fichier JSON?", "Confirmation",
-							JOptionPane.YES_NO_OPTION);
-				if (choice == JOptionPane.YES_OPTION) {
-					location = FileSaver.saveDataAsJSON(dbName, DBUtil.getRelatedTablesAggregatedData(dbName));
-					message = "Le fichier json est creer avec succès dans :\n" + location + dbName + ".json";
-				} else {
+				final String[] options = new String[] {"Many to One", "One to Many", "Fichiers séparés"};
+				int choice = -1;
+				if (DBUtil.getSchemaType(dbName) == SchemaType.STAR)
+					choice = JOptionPane.showOptionDialog(getContentPane(),
+							"Le schéma de la base de données sélectionée est en étoile.\nVeuillez choisir la méthode d'enregistrement ?",
+							"Méthode d'enregistrement", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
+				switch (choice) {
+				case 0:
+					location = FileSaver.saveDataAsJSON(dbName, DBUtil.getManyToOneTablesData(dbName));
+					message = "Le fichier json sont été créés avec succès dans :\n" + location + dbName + ".json";
+					break;
+				case 1:
+					location = FileSaver.saveDataAsJSON(dbName, DBUtil.getOneToManyTablesData(dbName));
+					message = "Le fichier json a été créé  avec succès dans :\n" + location + dbName + ".json";
+					break;
+				case 2:
 					location = FileSaver.saveDataAsJSON(dbName, DBUtil.getRelatedTablesData(dbName));
-					message = "Les fichiers json sont creer avec succès dans le dossier :\n" + location;
+					message = "Les fichiers json sont été créés avec succès dans le dossier :\n" + location;
+					break;
+				default:
+					break;
 				}
-				JOptionPane.showMessageDialog(getContentPane(), message);
+				if (!message.isEmpty())
+					JOptionPane.showMessageDialog(getContentPane(), message);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 				JOptionPane.showMessageDialog(getContentPane(),
