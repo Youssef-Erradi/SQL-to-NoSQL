@@ -109,7 +109,7 @@ public class MainWindow extends JFrame {
 				String message = "";
 				String location = "";
 				final String[] options = new String[] {"Many to One", "One to Many", "Fichiers séparés"};
-				int choice = -1;
+				int choice = 2;
 				if (DBUtil.getSchemaType(dbName) == SchemaType.STAR)
 					choice = JOptionPane.showOptionDialog(getContentPane(),
 							"Le schéma de la base de données sélectionée est en étoile.\nVeuillez choisir la méthode d'enregistrement ?",
