@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.Font;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
@@ -89,49 +88,43 @@ public class MainWindow extends JFrame {
 	}
 
 	private ActionListener databasesComboBoxActionListener() {
-		return new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dbName = (String) databasesComboBox.getSelectedItem();
-				List<Relationship> list = DBUtil.getRelationshipsBetweenTables(dbName);
-				listRelationships.setListData(list.toArray(new Relationship[list.size()]));
-			}
+		return event -> {
+			dbName = (String) databasesComboBox.getSelectedItem();
+			List<Relationship> list = DBUtil.getRelationshipsBetweenTables(dbName);
+			listRelationships.setListData(list.toArray(new Relationship[list.size()]));
 		};
 	}
 
 	private ActionListener btnSubmitActionListener() {
-		return new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (DBUtil.getRelatedTablesData(dbName).isEmpty()) {
-					JOptionPane.showMessageDialog(getContentPane(),
-							"Elle n'existe aucune relation entre les tables de la base de donneés sélectionée",
-							"Message", JOptionPane.WARNING_MESSAGE);
-					return;
-				}
+		return event -> {
+			if (DBUtil.getRelatedTablesData(dbName).isEmpty()) {
+				JOptionPane.showMessageDialog(getContentPane(),
+						"Elle n'existe aucune relation entre les tables de la base de donneés sélectionée", "Message",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
 
-				try {
-					String message = "";
-					String location = "";
-					int choice = JOptionPane.NO_OPTION;
-					if (listRelationships.getModel().getSize() == 1)
-						choice = JOptionPane.showConfirmDialog(getContentPane(),
-								"Voulez-vous enregistrer toutes les données dans un seul fichier JSON?", "Confirmation",
-								JOptionPane.YES_NO_OPTION);
-					if (choice == JOptionPane.YES_OPTION) {
-						location = FileSaver.saveDataAsJSON(dbName, DBUtil.getRelatedTablesAggregatedData(dbName));
-						message = "Le fichier json est creer avec succès dans :\n" + location + dbName + ".json";
-					} else {
-						location = FileSaver.saveDataAsJSON(dbName, DBUtil.getRelatedTablesData(dbName));
-						message = "Les fichiers json sont creer avec succès dans le dossier :\n" + location;
-					}
-					JOptionPane.showMessageDialog(getContentPane(), message);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					JOptionPane.showMessageDialog(getContentPane(),
-							"Une erreur s'est produite lors de la création des fichiers JSON", "Message d'erreur",
-							JOptionPane.ERROR_MESSAGE);
+			try {
+				String message = "";
+				String location = "";
+				int choice = JOptionPane.NO_OPTION;
+				if (listRelationships.getModel().getSize() == 1)
+					choice = JOptionPane.showConfirmDialog(getContentPane(),
+							"Voulez-vous enregistrer toutes les données dans un seul fichier JSON?", "Confirmation",
+							JOptionPane.YES_NO_OPTION);
+				if (choice == JOptionPane.YES_OPTION) {
+					location = FileSaver.saveDataAsJSON(dbName, DBUtil.getRelatedTablesAggregatedData(dbName));
+					message = "Le fichier json est creer avec succès dans :\n" + location + dbName + ".json";
+				} else {
+					location = FileSaver.saveDataAsJSON(dbName, DBUtil.getRelatedTablesData(dbName));
+					message = "Les fichiers json sont creer avec succès dans le dossier :\n" + location;
 				}
+				JOptionPane.showMessageDialog(getContentPane(), message);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(getContentPane(),
+						"Une erreur s'est produite lors de la création des fichiers JSON", "Message d'erreur",
+						JOptionPane.ERROR_MESSAGE);
 			}
 		};
 	}
