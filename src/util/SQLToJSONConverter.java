@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SQLToJSONConverter {
 
@@ -90,5 +93,27 @@ public class SQLToJSONConverter {
 		
 		return info;
 	}
-
+	
+	private static JSONObject getJSONFromSQLStatements(List<String> SQLStatements) {
+		JSONObject json = new JSONObject();
+		
+		SQLStatements.forEach(sql -> {
+			String[] metadata = sql.split("VALUES");
+			String table = metadata[0].split("`")[1];
+			String[] columns = metadata[0].substring(metadata[0].indexOf("(")+1, metadata[0].indexOf(")")).replaceAll("`", "").split(",");
+			String[] rows = metadata[1].split("\\),\\(");
+			
+			JSONArray tableData = new JSONArray();
+			for(int i=0; i<rows.length; i++) {
+				JSONObject row = new JSONObject();
+				String[] values = rows[i].replaceAll("[\\(\\)';]", "").split(",");
+				for(int j=0; j<columns.length; j++)
+					row.put(columns[j].trim(), values[j].trim() );
+				tableData.add(row);
+			}
+			json.put(table, tableData);
+		});
+		return json;
+	}
+	
 }
