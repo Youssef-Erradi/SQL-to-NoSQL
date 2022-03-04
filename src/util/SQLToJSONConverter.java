@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +23,7 @@ public class SQLToJSONConverter {
 		return Arrays.asList(sqlStatements);
 	}
 	
-	private static List<List<String>> statementsSplit(String filename) throws IOException {
+	private static Map<String, List<String>> statementsSplit(String filename) throws IOException {
 		System.out.println("Get sql statements from file ....");
 		List data = new ArrayList<>(),
 					tables= new ArrayList<>(),
@@ -85,11 +87,11 @@ public class SQLToJSONConverter {
 			}
 		}
 		
-		List info = new ArrayList<>();
-		info.add(tables);
-		info.add(data);
-		info.add(foreign);
-		info.add(primaryKeyData);
+		Map<String, List<String>> info = new HashMap<>();
+		info.put("tables", tables);
+		info.put("data", data);
+		info.put("foreign", foreign);
+		info.put("primary", primaryKeyData);
 		
 		return info;
 	}
