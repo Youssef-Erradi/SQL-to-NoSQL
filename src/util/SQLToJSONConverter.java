@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SQLToJSONConverter {
@@ -23,8 +25,7 @@ public class SQLToJSONConverter {
 		return Arrays.asList(sqlStatements);
 	}
 	
-	private static Map<String, List<String>> statementsSplit(String filename) throws IOException {
-		System.out.println("Get sql statements from file ....");
+	private static Map<String, List> statementsSplit(String filename) throws IOException {
 		List data = new ArrayList<>(),
 					tables= new ArrayList<>(),
 					foreign_key = new ArrayList<>(),
@@ -87,7 +88,7 @@ public class SQLToJSONConverter {
 			}
 		}
 		
-		Map<String, List<String>> info = new HashMap<>();
+		Map<String, List> info = new HashMap<>();
 		info.put("tables", tables);
 		info.put("data", data);
 		info.put("foreign", foreign);
@@ -118,4 +119,48 @@ public class SQLToJSONConverter {
 		return json;
 	}
 	
+	private static void generateJSONFiles(String filename) {
+		try {
+			Map<String, List> info = statementsSplit(filename);
+			List data = info.get("data");
+			List foreign = info.get("foreign");			
+			JSONObject json = getJSONFromSQLStatements(data);
+
+			JSONObject clonedJSON = (JSONObject)new JSONParser().parse(json.toJSONString());
+			for(List<String> k : (List<List<String>>)foreign) {
+				for(Object obj : (JSONArray)clonedJSON.get(k.get(0))) {
+					JSONObject left = (JSONObject) obj;
+					List arr = new ArrayList<>();
+					((JSONArray)json.get(k.get(3))).forEach(item -> {
+						JSONObject x = (JSONObject) item;
+						if( ((String)x.get(k.get(4))).equals( ((String)left.get(k.get(2))) ) )
+							arr.add(x);
+						left.put(k.get(3), arr);
+					});
+				}
+				
+				for(Object obj : (JSONArray)clonedJSON.get(k.get(3))) {
+					JSONObject left = (JSONObject) obj;
+					List arr = new ArrayList<>();
+					((JSONArray)json.get(k.get(0))).forEach(item -> {
+						JSONObject x = (JSONObject) item;
+						if( ((String)x.get(k.get(2))).equals( ((String)left.get(k.get(4))) ) ) {
+							arr.add(x);
+						}
+						left.put(k.get(0), arr);
+					});
+				}
+			}
+			
+			FileSaver.saveDataAsJSON("json_no_ref", json);
+			FileSaver.saveDataAsJSON("json_with_ref", clonedJSON);			
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) {
+		generateJSONFiles("spring-mvc.sql");
+		System.err.println("Done !!!!");
+	}
 }
