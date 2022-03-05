@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -14,11 +15,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileSystemView;
 
 import dao.DBUtil;
 import enums.SchemaType;
 import pojos.Relationship;
 import util.FileSaver;
+import util.SQLToJSONConverter;
 
 public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -2278436951424873713L;
@@ -67,7 +70,7 @@ public class MainWindow extends JFrame {
 
 		JButton btnSubmit = new JButton("G\u00E9n\u00E9rer les fichiers JSON");
 		btnSubmit.setFont(FONT);
-		btnSubmit.setBounds(131, 338, 196, 40);
+		btnSubmit.setBounds(10, 340, 196, 40);
 		getContentPane().add(btnSubmit);
 		btnSubmit.addActionListener(btnSubmitActionListener());
 
@@ -82,6 +85,29 @@ public class MainWindow extends JFrame {
 		lbl.setFont(FONT);
 		lbl.setBounds(12, 70, 175, 27);
 		getContentPane().add(lbl);
+		
+		JButton btnSQLToJSON = new JButton("G\u00E9n\u00E9rer JSON depuis SQL");
+		btnSQLToJSON.setFont(FONT);
+		btnSQLToJSON.setBounds(242, 340, 196, 40);
+		getContentPane().add(btnSQLToJSON);
+		btnSQLToJSON.addActionListener(sqlTojsonConverter());
+	}
+
+	private ActionListener sqlTojsonConverter() {
+		return event -> {
+			JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+			int response = fileChooser.showSaveDialog(null);
+			if( response != JFileChooser.APPROVE_OPTION) 
+				return;
+			
+			try {
+				SQLToJSONConverter.generateJSONFilesFromSQLFile( fileChooser.getSelectedFile().getAbsolutePath() );
+				JOptionPane.showMessageDialog(getContentPane(),
+						"Les Fichiers sont été créés avec succès\ndans json_no_ref et json_with_ref");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		};
 	}
 
 	private void populateDatabasesComboBox() {
