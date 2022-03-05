@@ -20,7 +20,7 @@ import org.json.simple.parser.ParseException;
 public class SQLToJSONConverter {
 
 	private static List<String> getSQLfromFile(String filename) throws IOException {
-		String content = new String(Files.readAllBytes(new File("files/sql/" + filename).toPath()));
+		String content = new String(Files.readAllBytes(new File(filename).toPath()));
 		String[] sqlStatements = content.split("--\n");
 		return Arrays.asList(sqlStatements);
 	}
@@ -119,48 +119,45 @@ public class SQLToJSONConverter {
 		return json;
 	}
 	
-	private static void generateJSONFiles(String filename) {
-		try {
+	public static void generateJSONFilesFromSQLFile(String filename) throws IOException {
 			Map<String, List> info = statementsSplit(filename);
 			List data = info.get("data");
 			List foreign = info.get("foreign");			
 			JSONObject json = getJSONFromSQLStatements(data);
-
-			JSONObject clonedJSON = (JSONObject)new JSONParser().parse(json.toJSONString());
-			for(List<String> k : (List<List<String>>)foreign) {
-				for(Object obj : (JSONArray)clonedJSON.get(k.get(0))) {
-					JSONObject left = (JSONObject) obj;
-					List arr = new ArrayList<>();
-					((JSONArray)json.get(k.get(3))).forEach(item -> {
-						JSONObject x = (JSONObject) item;
-						if( ((String)x.get(k.get(4))).equals( ((String)left.get(k.get(2))) ) )
-							arr.add(x);
-						left.put(k.get(3), arr);
-					});
+			
+			try {
+				JSONObject clonedJSON = (JSONObject)new JSONParser().parse(json.toJSONString());
+				for(List<String> k : (List<List<String>>)foreign) {
+					for(Object obj : (JSONArray)clonedJSON.get(k.get(0))) {
+						JSONObject left = (JSONObject) obj;
+						List arr = new ArrayList<>();
+						((JSONArray)json.get(k.get(3))).forEach(item -> {
+							JSONObject x = (JSONObject) item;
+							if( ((String)x.get(k.get(4))).equals( ((String)left.get(k.get(2))) ) )
+								arr.add(x);
+							left.put(k.get(3), arr);
+						});
+					}
+					
+					for(Object obj : (JSONArray)clonedJSON.get(k.get(3))) {
+						JSONObject left = (JSONObject) obj;
+						List arr = new ArrayList<>();
+						((JSONArray)json.get(k.get(0))).forEach(item -> {
+							JSONObject x = (JSONObject) item;
+							if( ((String)x.get(k.get(2))).equals( ((String)left.get(k.get(4))) ) ) {
+								arr.add(x);
+							}
+							left.put(k.get(0), arr);
+						});
+					}
 				}
 				
-				for(Object obj : (JSONArray)clonedJSON.get(k.get(3))) {
-					JSONObject left = (JSONObject) obj;
-					List arr = new ArrayList<>();
-					((JSONArray)json.get(k.get(0))).forEach(item -> {
-						JSONObject x = (JSONObject) item;
-						if( ((String)x.get(k.get(2))).equals( ((String)left.get(k.get(4))) ) ) {
-							arr.add(x);
-						}
-						left.put(k.get(0), arr);
-					});
-				}
+				FileSaver.saveDataAsJSON("json_no_ref", json);
+				FileSaver.saveDataAsJSON("json_with_ref", clonedJSON);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-			FileSaver.saveDataAsJSON("json_no_ref", json);
-			FileSaver.saveDataAsJSON("json_with_ref", clonedJSON);			
-		} catch (IOException | ParseException e) {
-			e.printStackTrace();
-		}
 	}
-	
-	public static void main(String[] args) {
-		generateJSONFiles("spring-mvc.sql");
-		System.err.println("Done !!!!");
-	}
+
 }
